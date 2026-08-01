@@ -41,8 +41,7 @@ jobs:
         config = re.sub(r'^# android.minapi = .*', 'android.minapi = 21', config, flags=re.M)
         with open('buildozer.spec', 'w') as f: f.write(config)
         "
-        # Forzar aceptación de licencias de Android SDK de forma automática
-        yes | buildozer android debug
+        buildozer -v android debug
 
     - name: Upload APK Artifact
       uses: actions/upload-artifact@v4
