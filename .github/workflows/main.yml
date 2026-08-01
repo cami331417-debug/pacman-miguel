@@ -15,9 +15,9 @@ jobs:
     - name: Set up Python
       uses: actions/setup-python@v5
       with:
-        python-version: '3.10'
+        python-version: '3.11'
 
-    - name: Install dependencies
+    - name: Install system dependencies
       run: |
         sudo apt-get update
         sudo apt-get install -y git zip unzip openjdk-17-jdk python3-pip autoconf libtool pkg-config zlib1g-dev libffi-dev libssl-dev ffmpeg lld
@@ -36,9 +36,13 @@ jobs:
         config = re.sub(r'^#icon.filename = .*', 'icon.filename = %(source.dir)s/icon.png', config, flags=re.M)
         config = re.sub(r'^requirements = .*', 'requirements = python3,pygame', config, flags=re.M)
         config = re.sub(r'^orientation = .*', 'orientation = landscape', config, flags=re.M)
+        config = re.sub(r'^# android.accept_sdk_license = .*', 'android.accept_sdk_license = True', config, flags=re.M)
+        config = re.sub(r'^# android.api = .*', 'android.api = 33', config, flags=re.M)
+        config = re.sub(r'^# android.minapi = .*', 'android.minapi = 21', config, flags=re.M)
         with open('buildozer.spec', 'w') as f: f.write(config)
         "
-        buildozer -v android debug
+        # Forzar aceptación de licencias de Android SDK de forma automática
+        yes | buildozer android debug
 
     - name: Upload APK Artifact
       uses: actions/upload-artifact@v4
