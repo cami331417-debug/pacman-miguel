@@ -1,0 +1,42 @@
+name: Compilar APK Pacman
+
+on:
+  push:
+    branches: [ main, master ]
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.10'
+
+    - name: Install dependencies
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y python3-pip git zip unzip openjdk-17-jdk ffmpeg libffi-dev libssl-dev autoconf libtool pkg-config zlib1g-dev
+        pip install --upgrade pip
+        pip install "cython<3.0.0" buildozer
+
+    - name: Build with Buildozer
+      run: |
+        buildozer init
+        sed -i 's/^title = .*/title = PACMAN DE MIGUEL/' buildozer.spec
+        sed -i 's/^package.name = .*/package.name = pacmandemiguel/' buildozer.spec
+        sed -i 's/^source.include_exts = .*/source.include_exts = py,png,jpg,mp3,wav/' buildozer.spec
+        sed -i 's/^#icon.filename = .*/icon.filename = %(source.dir)s\/icon.png/' buildozer.spec
+        sed -i 's/^requirements = .*/requirements = python3,pygame/' buildozer.spec
+        sed -i 's/^orientation = .*/orientation = landscape/' buildozer.spec
+        buildozer android debug
+
+    - name: Upload APK
+      uses: actions/upload-artifact@v4
+      with:
+        name: Pacman-APK
+        path: bin/*.apk
